@@ -1,0 +1,181 @@
+<head>
+    <title>Encrypted Chat Messenger</title>
+    <style>
+        ul {
+            list-style-type: none;
+        }
+        #links {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+li {
+    float: left;
+}
+
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover {
+    background-color: #111;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    padding: 0;
+    display: block;
+    margin: 0 auto;
+    max-height: 45%;
+    max-width: 45%;
+}
+
+html, body, {
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+}
+
+    </style>
+</head>
+
+
+<p>
+<ul id="links">
+    <li><a class="active" href="/home">Home</a></li>
+    <li><a href="/login">Login</a></li>
+    <li><a href="/create">Create Account</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/logout">Logout</a></li>
+</ul>
+</p>
+
+
+<body>
+    <center><h1>{{course}}</h1></center>
+    <h2>Endorsed threads</h2>
+    <ul id="endorsed"></ul>
+    <br>
+    _____________________________________________________________________________________
+    <br>
+    <h2>Regular threads</h2>
+    <ul id="threads"></ul>
+    <br>
+    <form action="/forum/{{course}}" method="POST">
+        <input type="hidden" name="sender" value="{{user}}">
+        <input type="hidden" name="course" value="{{course}}">
+        <input type="hidden" name="type" value="message">
+        <input type="submit" value="Add post"></center>
+    </form>
+    <form action="/forum/{{course}}" method="POST">
+        <input type="hidden" name="sender" value="{{user}}">
+        <input type="hidden" name="course" value="{{course}}">
+        <input type="hidden" name="type" value="refresh">
+        <input type="submit" value="Refresh threads"></center>
+    </form>
+
+
+    <script>
+        // Go over list and decrypt each message
+        const myList = document.getElementById('threads');
+        const list2 = document.getElementById('endorsed');
+        const messages = {{!threads}};
+        
+        // Seperate async function to let entire thing run
+        async function iterate() {
+            for (let i = 0; i < messages.length; i += 1) {
+                const form = document.createElement('form');
+                form.method = "POST";
+                form.action = "endorse";
+
+                if (messages[i][0][1] == 'Y') form.innerText = "Anonymous";
+                else form.innerText = messages[i][0][0];
+                form.innerText += ": " + messages[i][2] + "\n";
+                
+                const endorser = document.createElement('input');
+                endorser.type = "hidden";
+                endorser.name = "endorser";
+                endorser.value = "{{user}}"
+
+                const course = document.createElement('input');
+                course.type = "hidden";
+                course.name = "course";
+                course.value = "{{course}}"
+
+                const id = document.createElement('input');
+                id.type = "hidden";
+                id.name = "id";
+                id.value = messages.length - i - 1;
+
+                const button = document.createElement('input');
+                button.value = "Endorse";
+                button.type = "submit";
+                
+                form.appendChild(course);
+                form.appendChild(endorser);
+                form.appendChild(id);
+                form.appendChild(button);
+                if (messages[i][1][1] > 0) {
+                    list2.appendChild(form)
+                } else {
+                    myList.appendChild(form);
+                }
+            }   
+        }
+
+        // Seperate async function to let entire thing run
+        async function iterate2() {
+            for (let i = 0; i < endorsed.length; i += 1) {
+                const form = document.createElement('form');
+                form.method = "POST";
+                form.action = "/endorse";
+
+                if (endorsed[i][0][1] == 'Y') form.innerText = "Anonymous";
+                else form.innerText = endorsed[i][0][0];
+                form.innerText += ": " + endorsed[i][2] + "\n";
+                
+                const endorser = document.createElement('input');
+                endorser.type = "hidden";
+                endorser.name = "endorser";
+                endorser.value = "{{user}}"
+
+                const course = document.createElement('input');
+                course.type = "hidden";
+                course.name = "course";
+                course.value = "{{course}}"
+
+                const id = document.createElement('input');
+                id.type = "hidden";
+                id.name = "id";
+                id.value = endorsed.length - i - 1;
+
+                const button = document.createElement('input');
+                button.value = "Endorse";
+                button.type = "submit";
+                
+                form.appendChild(endorser);
+                form.appendChild(course);
+                form.appendChild(id);
+                form.appendChild(button);
+                list2.appendChild(form);
+            }   
+        }
+
+        iterate();
+        iterate2();
+    </script>
+</body>

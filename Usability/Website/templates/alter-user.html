@@ -1,0 +1,38 @@
+<h1>User: ${user}</h1>
+<p>Courses: ${courses}</p>
+<p>Admin: ${admin}</p>
+<p>Muted: ${muted}</p>
+
+<form action="/addCourse" method="post">
+    <input type="hidden" name="user" value="${user}" />
+    Course name: <input name="coursename" type="text" />
+</br>
+    <input value="Add course" type="submit"/>
+</form>
+
+<form action="/removeCourse" method="post">
+    <input type="hidden" name="user" value="${user}" />
+    Course name: <input name="coursename" type="text" />
+</br>
+    <input value="Remove course" type="submit"/>
+</form>
+
+<form action="/makeAdmin" method="post">
+    <input type="hidden" name="user" value="${user}" />
+    Admin (Y/N): <input name="admin" type="text" />
+</br>
+    <input value="Submit" type="submit"/>
+</form>
+
+<form action="/mute" method="post">
+    <input type="hidden" name="user" value="${user}" />
+    Mute (Y/N): <input name="mute" type="text" />
+</br>
+    <input value="Submit" type="submit"/>
+</form>
+
+<form action="/deleteUser" method="post">
+    <input type="hidden" name="user" value="${user}" />
+</br>
+    <input value="Delete user" type="submit"/>
+</form>

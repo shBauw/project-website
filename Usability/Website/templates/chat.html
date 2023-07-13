@@ -1,0 +1,187 @@
+<head>
+    <title>Encrypted Chat Messenger</title>
+    <style>
+        ul {
+            list-style-type: none;
+        }
+        #links {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+li {
+    float: left;
+}
+
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover {
+    background-color: #111;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    padding: 0;
+    display: block;
+    margin: 0 auto;
+    max-height: 45%;
+    max-width: 45%;
+}
+
+html, body, {
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+}
+
+    </style>
+</head>
+
+
+<p>
+    <ul id="links">
+      <li><a class="active" href="/home">Home</a></li>
+      <li><a href="/admin">Admin</a></li>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/create">Create Account</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/logout">Logout</a></li>
+    </ul>
+</p>
+
+
+<body>
+    <center><h1>{{user1}} and {{user2}}</h1></center>
+    <ul id="chat"></ul>
+    <form id="TWo" action="/chat/{{user1}}/{{user2}}" method="POST">
+        <input type="hidden" name="sender" value="{{user1}}">
+        <input type="hidden" name="recipient" value="{{user2}}">
+        <input type="hidden" name="pubkey" value="{{pubkey}}">
+        <center><label for="message">Message:</label>
+        <input type="text" name="message" id="message">
+        <input type="submit" value="Send"></center>
+    </form>
+
+    <br>
+    <form action="/chat/{{user1}}/{{user2}}" method="POST">
+        <input type="hidden" name="sender" value="{{user1}}">
+        <input type="hidden" name="recipient" value="{{user2}}">
+        <input type="hidden" name="pubkey" value="{{pubkey}}">
+        <input type="hidden" name="message" id="message" value="">
+        <input type="submit" value="Refresh messages"></center>
+    </form>
+
+
+    <script>
+        // Set up for processing
+        const pubkey = {{pubkey}};
+        const privkey = window.localStorage.getItem("privkey");
+
+        const secretkey = Number((BigInt(pubkey)**BigInt(privkey))%BigInt(Number.MAX_VALUE)).toString(16);
+
+        // Hash to 256-bit hexadecimal
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);                    
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));                 
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // Convert base64 string to array buffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        const key = new TextEncoder().encode(sha256(secretkey));
+
+        // Decrypt message
+        async function decryptMessage(entirety) {
+            const hash = entirety[3]
+            const ivInput = entirety[2]
+            const encryptedData = entirety[1]
+            const sender = entirety[0]
+
+            const importedKey = await window.crypto.subtle.importKey("raw", key, {name: "AES-CBC"}, true, ["encrypt", "decrypt"]);
+            const message = base64ToArrayBuffer(encryptedData);
+            const iv = base64ToArrayBuffer(ivInput);
+
+            const decrypted = await window.crypto.subtle.decrypt({name: 'AES-CBC', iv: iv}, importedKey, message);
+            const decryptedText = new TextDecoder('utf-8').decode(decrypted);
+            
+            if (sha256(decryptedText + secretkey) == hash) return sender + ": " + decryptedText;
+            return "[Modified Message]"
+        }
+
+        // Find and select form and field for encryption
+        const form = document.getElementById("TWo");
+        const messageInput = document.getElementById("message");
+
+        // Encrypt message on submission
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const plaintext = messageInput.value;
+            const importedKey = await window.crypto.subtle.importKey("raw", key, { name: "AES-CBC" }, true, ["encrypt", "decrypt"]);
+            const iv = crypto.getRandomValues(new Uint8Array(16));
+
+            const encrypted = await crypto.subtle.encrypt({ name: "AES-CBC", iv }, importedKey, new TextEncoder().encode(plaintext));
+
+            const encryptedBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(encrypted)));
+            const ivBase64 = btoa(String.fromCharCode.apply(null, iv));
+
+            messageInput.value = encryptedBase64;
+
+            var ivInput = document.createElement("input");
+            ivInput.type = "hidden";
+            ivInput.name = "iv";
+            ivInput.value = ivBase64;
+            form.appendChild(ivInput);
+
+            var hashChecksum = document.createElement("input");
+            hashChecksum.type = "hidden";
+            hashChecksum.name = "hash";
+            hashChecksum.value = sha256(plaintext+secretkey);
+            form.appendChild(hashChecksum);
+
+            form.submit();
+        });
+
+        // Go over list and decrypt each message
+        const myList = document.getElementById('chat');
+        const messages = {{!messages}};
+        
+        // Seperate async function to let entire thing run
+        async function iterate() {
+            for (let i = 0; i < messages.length; i += 1) {
+                const lsItem = document.createElement('ul');
+                lsItem.innerText = await decryptMessage(messages[i]);
+                myList.appendChild(lsItem);
+            }   
+        }
+
+        iterate();
+    </script>
+</body>

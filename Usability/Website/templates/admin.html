@@ -1,0 +1,17 @@
+<p>Hello ${name}!</p>
+<p>The list of users to edit is ${users}</p>
+
+<form action="/admin" method="post">
+    <input type="hidden" name="current" value="${name}" />
+    User: <input name="username" type="text" />
+</br>
+    <input value="Select user" type="submit"/>
+</form>
+
+<p>The list of courses to edit is ${courses}</p>
+<form action="/admin2" method="post">
+    <input type="hidden" name="current" value="${name}" />
+    Course: <input name="coursename" type="text" />
+</br>
+    <input value="Select course" type="submit"/>
+</form>

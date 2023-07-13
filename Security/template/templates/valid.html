@@ -1,0 +1,20 @@
+<body>
+<p>This username-password combination is valid, welcome ${name}!</p>
+
+<form id="form" action="/valid" method="post">
+    <input type="hidden" name="current" value="${name}" />
+    <input type="hidden" name="pubkey" value=""/>
+</br>
+    <input value="Friends list" type="submit"/>
+</form>
+
+<script>
+    const base = 43
+    const a =  Math.round(Math.random() * 100000);
+
+    window.localStorage.setItem("privkey", a);
+
+    const A = Number(BigInt(base)**BigInt(a) % BigInt(Number.MAX_VALUE))
+    document.querySelector('input[name="pubkey"]').value = A;
+</script>
+</body>

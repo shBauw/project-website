@@ -1,0 +1,9 @@
+<p>Hello ${name}!</p>
+<p>The list of users to talk to is ${users}</p>
+
+<form action="/friends" method="post">
+    <input type="hidden" name="current" value="${name}" />
+    User: <input name="username" type="text" />
+</br>
+    <input value="Begin chat" type="submit"/>
+</form>

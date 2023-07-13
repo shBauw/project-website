@@ -1,0 +1,7 @@
+myCA.key: kdhfdkf7$&##Dsfkj312
+INFO2222.csr: sdjhfkjdhsfk#*@&(*K3
+
+Passphrase for private key: INFO2222Sun2Apr
+Cert challenge password: kfd837$^*1jfn
+
+Domain name defined in /etc/hosts

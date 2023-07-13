@@ -1,0 +1,4 @@
+bottle
+bottle-session
+sqlite3
+redis

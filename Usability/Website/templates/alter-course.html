@@ -1,0 +1,15 @@
+<h1>Course: ${course}</h1>
+<p>Users: ${users}</p>
+
+<form action="/renameCourse" method="post">
+    <input type="hidden" name="course" value="${course}" />
+    New name: <input name="coursename" type="text" />
+</br>
+    <input value="Rename" type="submit"/>
+</form>
+
+<form action="/deleteCourse" method="post">
+    <input type="hidden" name="course" value="${course}" />
+</br>
+    <input value="Delete" type="submit"/>
+</form>
